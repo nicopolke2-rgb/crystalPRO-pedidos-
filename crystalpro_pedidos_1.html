@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CrystalPRO - Pedidos</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f1f0eb;min-height:100vh;}
+.app{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;}
+.header{background:#0F6E56;color:#fff;padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.htitle{font-size:17px;font-weight:600;}
+.hsub{font-size:11px;opacity:.75;margin-top:2px;}
+.badge{background:#fff;color:#0F6E56;font-size:12px;font-weight:700;border-radius:20px;padding:3px 10px;min-width:30px;text-align:center;}
+.tabs{display:flex;border-bottom:1px solid #e5e5e5;background:#fff;position:sticky;top:57px;z-index:9;}
+.tab{flex:1;padding:12px 0;font-size:14px;text-align:center;color:#888;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;font-family:inherit;}
+.tab.active{color:#0F6E56;border-bottom-color:#0F6E56;font-weight:600;}
+.view{display:none;padding-bottom:40px;}
+.view.active{display:block;}
+.slabel{font-size:11px;font-weight:600;color:#999;letter-spacing:.8px;padding:14px 16px 6px;text-transform:uppercase;}
+.sw{position:relative;padding:0 16px 8px;}
+.sw input{width:100%;padding:10px 12px 10px 38px;border:1px solid #ddd;border-radius:10px;font-size:14px;background:#f9f9f9;color:#111;font-family:inherit;}
+.sw input:focus{outline:none;border-color:#0F6E56;background:#fff;}
+.swico{position:absolute;left:28px;top:50%;transform:translateY(-50%);color:#aaa;font-size:15px;}
+.cats{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;}
+.cats::-webkit-scrollbar{display:none;}
+.cbtn{flex-shrink:0;font-size:12px;padding:6px 14px;border-radius:20px;border:1px solid #ddd;background:#f5f5f5;color:#555;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.cbtn.on{background:#0F6E56;color:#fff;border-color:#0F6E56;font-weight:600;}
+.plist{padding:0 16px;display:flex;flex-direction:column;gap:8px;}
+.pc{background:#fff;border:1px solid #eee;border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:10px;}
+.pi{flex:1;min-width:0;}
+.pn{font-size:13px;font-weight:600;color:#111;line-height:1.3;}
+.pm{font-size:11px;color:#aaa;margin-top:2px;}
+.qc{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.qc button{width:30px;height:30px;border-radius:50%;border:1px solid #ddd;background:#f5f5f5;color:#333;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+.qc button.qa{background:#0F6E56;color:#fff;border-color:#0F6E56;}
+.qn{font-size:15px;font-weight:600;min-width:22px;text-align:center;color:#111;}
+.ccard{background:#f9f9f9;border:1px dashed #ccc;border-radius:12px;padding:14px 13px;margin:0 16px;}
+.ccard input,.ccard select{width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:9px;font-size:13px;background:#fff;color:#111;margin-bottom:9px;font-family:inherit;}
+.ccard input:focus,.ccard select:focus{outline:none;border-color:#0F6E56;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.g2 input,.g2 select{margin-bottom:0;}
+.lbl{font-size:11px;color:#888;margin-bottom:4px;font-weight:500;}
+.gbtn{width:100%;padding:11px;background:#0F6E56;color:#fff;border:none;border-radius:10px;font-size:14px;cursor:pointer;font-weight:600;margin-top:10px;font-family:inherit;}
+.gbtn:active{background:#085041;}
+.cpanel{margin:0 16px;background:#fff;border:1px solid #eee;border-radius:12px;overflow:hidden;}
+.ci{display:flex;align-items:center;padding:11px 13px;border-bottom:1px solid #f0f0f0;gap:8px;}
+.ci:last-of-type{border-bottom:none;}
+.cin{flex:1;font-size:13px;color:#111;font-weight:500;}
+.ciq{font-size:12px;color:#aaa;white-space:nowrap;}
+.cdel{color:#bbb;font-size:20px;cursor:pointer;padding:2px 6px;border:none;background:none;}
+.ctotal{padding:12px 14px;border-top:1px solid #eee;display:flex;justify-content:space-between;align-items:center;background:#f9fdf9;}
+.ctl{font-size:13px;color:#666;}
+.ctv{font-size:17px;font-weight:700;color:#0F6E56;}
+.emsg{padding:28px;text-align:center;color:#bbb;font-size:13px;}
+.tagc{display:inline-block;font-size:10px;background:#EAF3DE;color:#27500A;border-radius:4px;padding:1px 6px;margin-left:5px;font-weight:600;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0F6E56;color:#fff;font-size:13px;padding:9px 20px;border-radius:24px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:999;font-weight:500;}
+.toast.show{opacity:1;}
+.irow{padding:0 16px 8px;display:flex;flex-direction:column;gap:10px;}
+.irow select,.irow input{width:100%;padding:10px 11px;border:1px solid #ddd;border-radius:10px;font-size:13px;background:#f9f9f9;color:#111;font-family:inherit;}
+.irow select:focus,.irow input:focus{outline:none;border-color:#0F6E56;background:#fff;}
+.dr{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.bconf{display:block;width:calc(100% - 32px);margin:14px 16px 0;padding:14px;background:#0F6E56;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;}
+.bconf:active{background:#085041;}
+.bconf:disabled{opacity:.45;}
+.hstats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 4px;}
+.sc{background:#f9fdf9;border:1px solid #d4edda;border-radius:12px;padding:14px;text-align:center;}
+.sv{font-size:22px;font-weight:700;color:#0F6E56;}
+.sl{font-size:11px;color:#888;margin-top:3px;}
+.hemp{padding:40px 16px;text-align:center;color:#bbb;font-size:13px;}
+.ocard{background:#fff;border:1px solid #eee;border-radius:12px;padding:13px 14px;margin:0 16px 10px;}
+.oh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.os{font-size:14px;font-weight:700;color:#111;}
+.od{font-size:11px;color:#aaa;margin-top:3px;}
+.oe{font-size:12px;color:#0F6E56;margin-bottom:6px;font-weight:500;}
+.oi{font-size:12px;color:#666;line-height:1.6;}
+.oact{display:flex;gap:8px;margin-top:11px;}
+.oact button{flex:1;padding:8px 0;font-size:12px;border-radius:9px;border:1px solid #ddd;background:#f5f5f5;color:#555;cursor:pointer;font-family:inherit;font-weight:500;}
+.oact button.rep{background:#0F6E56;color:#fff;border-color:#0F6E56;font-weight:600;}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.dp{background:#EF9F27;}
+.de{background:#0F6E56;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="header">
+  <div>
+    <div class="htitle">CrystalPRO &middot; Pedidos</div>
+    <div class="hsub">Insumos de limpieza &middot; C&oacute;rdoba</div>
+  </div>
+  <span class="badge" id="badge">0</span>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="goTab('pedido',this)">&#128722; Nuevo pedido</button>
+  <button class="tab" onclick="goTab('historial',this)">&#128203; Historial</button>
+</div>
+
+<div id="view-pedido" class="view active">
+  <div class="slabel">Sucursal y entrega</div>
+  <div class="irow">
+    <div>
+      <div class="lbl">Sucursal</div>
+      <select id="suc">
+        <option value="">&mdash; Seleccionar sucursal &mdash;</option>
+        <option>Nueva C&oacute;rdoba</option>
+        <option>Valpara&iacute;so</option>
+        <option>Villa Carlos Paz</option>
+        <option>Villa Allende</option>
+        <option>Cerro de las Rosas</option>
+        <option>Valle Escondido</option>
+        <option>Planta / Gral. Artigas</option>
+        <option>Gauss (Arg&uuml;ello)</option>
+        <option>Crisol</option>
+        <option>Otra sucursal</option>
+      </select>
+    </div>
+    <div class="dr">
+      <div>
+        <div class="lbl">Fecha de entrega</div>
+        <input type="date" id="fdate">
+      </div>
+      <div>
+        <div class="lbl">Turno</div>
+        <select id="turno">
+          <option value="">Cualquier hora</option>
+          <option>Ma&ntilde;ana (8-13hs)</option>
+          <option>Tarde (13-18hs)</option>
+          <option>Tarde-noche (18-21hs)</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <div class="lbl">Observaciones</div>
+      <input type="text" id="obs" placeholder="Ej: dejar en recepci&oacute;n, llamar antes...">
+    </div>
+  </div>
+
+  <div class="slabel">Cat&aacute;logo de productos</div>
+  <div class="sw">
+    <span class="swico">&#128269;</span>
+    <input type="search" id="srch" placeholder="Buscar producto..." oninput="rProds()">
+  </div>
+  <div class="cats" id="cats"></div>
+  <div class="plist" id="plist"></div>
+
+  <div class="slabel" style="margin-top:8px;">Producto no encontrado</div>
+  <div class="ccard">
+    <div class="lbl">Nombre del producto</div>
+    <input id="cn" type="text" placeholder="Ej: Desinfectante Pino x 5lt">
+    <div class="g2">
+      <div>
+        <div class="lbl">Cantidad</div>
+        <input id="cq" type="number" min="1" placeholder="Ej: 3">
+      </div>
+      <div>
+        <div class="lbl">Unidad</div>
+        <select id="cu">
+          <option value="unidades">Unidades</option>
+          <option value="litros">Litros</option>
+          <option value="kg">Kg</option>
+          <option value="packs">Packs</option>
+          <option value="cajas">Cajas</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:9px;">
+      <div class="lbl">Referencia o marca (opcional)</div>
+      <input id="cnote" type="text" placeholder="Ej: marca X, color azul...">
+    </div>
+    <button class="gbtn" onclick="addCustom()">+ Agregar al pedido</button>
+  </div>
+
+  <div class="slabel" style="margin-top:8px;">Tu pedido</div>
+  <div id="cartarea"></div>
+  <button class="bconf" id="bconf" onclick="confirmar()">Confirmar pedido &rarr;</button>
+</div>
+
+<div id="view-historial" class="view">
+  <div id="hstats"></div>
+  <div class="slabel">Pedidos anteriores</div>
+  <div id="hlist"></div>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var PRODS = [
+  {id:1,  n:"Alcohol al 70%",                          c:"Desinfeccion", u:"litros"},
+  {id:2,  n:"Alcohol en Gel x 250ml.",                 c:"Desinfeccion", u:"unidades"},
+  {id:3,  n:"Lavandina x 5 Lt.",                       c:"Desinfeccion", u:"litros"},
+  {id:4,  n:"Lavandina en Gel x 5 lt.",                c:"Desinfeccion", u:"litros"},
+  {id:5,  n:"Desengrasante Caustico x 5 lt.",          c:"Desinfeccion", u:"litros"},
+  {id:6,  n:"Lysoform Aerosol",                        c:"Desinfeccion", u:"unidades"},
+  {id:7,  n:"Lysoform x 5 lt.",                        c:"Desinfeccion", u:"litros"},
+  {id:8,  n:"Detergente x 5 Lt.",                      c:"Detergentes",  u:"litros"},
+  {id:9,  n:"Detergente Concentrado Neutro x 5 lt.",   c:"Detergentes",  u:"litros"},
+  {id:10, n:"Jabon Pan Blanco",                        c:"Detergentes",  u:"unidades"},
+  {id:11, n:"Jabon de Mano x5lt. TuttiFrutty/Dave",   c:"Detergentes",  u:"litros"},
+  {id:12, n:"Jabon Liquido Antibacterial x 5 lt.",     c:"Detergentes",  u:"litros"},
+  {id:13, n:"Limpiador Cremoso x 5lt.",                c:"Detergentes",  u:"litros"},
+  {id:14, n:"CIF Clasico",                             c:"Detergentes",  u:"unidades"},
+  {id:15, n:"Pack Bobina x 2 uni. x 400 mt.",          c:"Papel",        u:"packs"},
+  {id:16, n:"Pack Bobina x 4 uni. x 200 mt.",          c:"Papel",        u:"packs"},
+  {id:17, n:"Papel Higienico x8 cono chico",           c:"Papel",        u:"packs"},
+  {id:18, n:"Papel Higienico Ind. x8 cono grande",     c:"Papel",        u:"packs"},
+  {id:19, n:"Higienico Pack 12 paq. x4 rollos 30mt.",  c:"Papel",        u:"packs"},
+  {id:20, n:"Toallas Intercaladas Blanca Premium",     c:"Papel",        u:"unidades"},
+  {id:21, n:"Bolsa Residuos 45x60 x 30 uni.",          c:"Bolsas",       u:"packs"},
+  {id:22, n:"Bolsa Residuos 60x90 x 10 uni.",          c:"Bolsas",       u:"packs"},
+  {id:23, n:"Bolsa Residuos 80x110 x 10 uni.",         c:"Bolsas",       u:"packs"},
+  {id:24, n:"Bolsa Precorte 30x40",                    c:"Bolsas",       u:"packs"},
+  {id:25, n:"Bolsa Precorte 40x50",                    c:"Bolsas",       u:"packs"},
+  {id:26, n:"Guantes Nitrilo talle M",                 c:"Guantes",      u:"unidades"},
+  {id:27, n:"Guantes Nitrilo talle L",                 c:"Guantes",      u:"unidades"},
+  {id:28, n:"Guantes de Goma Amarillos TM",            c:"Guantes",      u:"unidades"},
+  {id:29, n:"Perfumina x 5 lts.",                      c:"Aromatizantes",u:"litros"},
+  {id:30, n:"Perfumina x 5 lts. Lavanda",              c:"Aromatizantes",u:"litros"},
+  {id:31, n:"Perfumina x 5 lts. Limon",                c:"Aromatizantes",u:"litros"},
+  {id:32, n:"Base Perfumina x 500cc Lysoform",         c:"Aromatizantes",u:"unidades"},
+  {id:33, n:"Desodorante Ambiental Aerosol",           c:"Aromatizantes",u:"unidades"},
+  {id:34, n:"Difusores Saphirus",                      c:"Aromatizantes",u:"unidades"},
+  {id:35, n:"Pastillas p/Mochila Pato Purific",        c:"Aromatizantes",u:"unidades"},
+  {id:36, n:"Disco Adhesivas p/inodoro",               c:"Aromatizantes",u:"unidades"},
+  {id:37, n:"Repuesto de MOPA Blanca",                 c:"Limpieza",     u:"unidades"},
+  {id:38, n:"Barredor Mopa Plana 80cm c/ Cabo",        c:"Limpieza",     u:"unidades"},
+  {id:39, n:"Panos Microfibras 40x60 cm.",             c:"Limpieza",     u:"unidades"},
+  {id:40, n:"Esponja Cero Rayas",                      c:"Limpieza",     u:"unidades"},
+  {id:41, n:"Esponjas Fibra Verdes",                   c:"Limpieza",     u:"unidades"},
+  {id:42, n:"Esponjas salva unas Grande",              c:"Limpieza",     u:"unidades"},
+  {id:43, n:"Escurridor con Bandeja",                  c:"Limpieza",     u:"unidades"},
+  {id:44, n:"Cabo Metalico con Rosca Blanco",          c:"Limpieza",     u:"unidades"},
+  {id:45, n:"Vaso Descartable p/Dispenser x 3000",    c:"Descartables", u:"cajas"},
+  {id:46, n:"Rollo Termico Comanda 80x50",             c:"Descartables", u:"unidades"},
+  {id:47, n:"Lustramuebles Aerosol",                   c:"Varios",       u:"unidades"},
+  {id:48, n:"Desodorizador Concentrado por goteo",     c:"Varios",       u:"unidades"}
+];
+
+var CATS = ["Todos"];
+var _seen = {};
+for (var _i=0; _i<PRODS.length; _i++) {
+  if (!_seen[PRODS[_i].c]) { _seen[PRODS[_i].c]=1; CATS.push(PRODS[_i].c); }
+}
+
+var cat = "Todos";
+var cart = {};
+var custom = [];
+
+function loadH() {
+  try { return JSON.parse(localStorage.getItem("cp_pedidos") || "[]"); }
+  catch(e) { return []; }
+}
+function saveH(h) {
+  try { localStorage.setItem("cp_pedidos", JSON.stringify(h)); } catch(e) {}
+}
+var hist = loadH();
+
+function fd(iso) {
+  if (!iso) return "";
+  var p = iso.split("-");
+  return p[2] + "/" + p[1] + "/" + p[0];
+}
+
+function goTab(t, btn) {
+  document.querySelectorAll(".view").forEach(function(v) { v.classList.remove("active"); });
+  document.querySelectorAll(".tab").forEach(function(b) { b.classList.remove("active"); });
+  document.getElementById("view-" + t).classList.add("active");
+  btn.classList.add("active");
+  if (t === "historial") rHist();
+}
+
+function rCats() {
+  var html = "";
+  for (var i=0; i<CATS.length; i++) {
+    var c = CATS[i];
+    html += '<button class="cbtn' + (c===cat?' on':'') + '" onclick="setCat(\'' + c + '\')">' + c + '</button>';
+  }
+  document.getElementById("cats").innerHTML = html;
+}
+
+function setCat(c) { cat = c; rCats(); rProds(); }
+
+function rProds() {
+  var q = document.getElementById("srch").value.toLowerCase();
+  var list = [];
+  for (var i=0; i<PRODS.length; i++) {
+    var p = PRODS[i];
+    var matchCat = (cat === "Todos" || p.c === cat);
+    var matchQ = (!q || p.n.toLowerCase().indexOf(q) >= 0);
+    if (matchCat && matchQ) list.push(p);
+  }
+  var el = document.getElementById("plist");
+  if (!list.length) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:#bbb;font-size:13px;">Sin resultados</div>';
+    return;
+  }
+  var html = "";
+  for (var j=0; j<list.length; j++) {
+    var p = list[j];
+    var qty = cart[p.id] || 0;
+    var btns = qty > 0
+      ? '<button onclick="sq(' + p.id + ',-1)">&#8722;</button><span class="qn">' + qty + '</span>'
+      : '';
+    html += '<div class="pc">'
+      + '<div class="pi"><div class="pn">' + p.n + '</div><div class="pm">' + p.u + ' &middot; ' + p.c + '</div></div>'
+      + '<div class="qc">' + btns + '<button class="qa" onclick="sq(' + p.id + ',1)">+</button></div>'
+      + '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function sq(id, d) {
+  var p = null;
+  for (var i=0; i<PRODS.length; i++) { if (PRODS[i].id === id) { p = PRODS[i]; break; } }
+  cart[id] = Math.max(0, (cart[id] || 0) + d);
+  if (!cart[id]) delete cart[id];
+  rProds(); rCart(); rBadge();
+  if (d > 0) toast("Agregado: " + p.n);
+}
+
+function addCustom() {
+  var n = document.getElementById("cn").value.trim();
+  var q = parseInt(document.getElementById("cq").value) || 1;
+  var u = document.getElementById("cu").value;
+  var note = document.getElementById("cnote").value.trim();
+  if (!n) { document.getElementById("cn").focus(); toast("Ingresa el nombre del producto"); return; }
+  custom.push({id:"c"+Date.now(), n:n, q:q, u:u, note:note, isC:true});
+  document.getElementById("cn").value = "";
+  document.getElementById("cq").value = "";
+  document.getElementById("cnote").value = "";
+  rCart(); rBadge();
+  toast("Agregado: " + n);
+}
+
+function rmItem(id, isC) {
+  if (isC) {
+    var nc = [];
+    for (var i=0; i<custom.length; i++) { if (custom[i].id !== id) nc.push(custom[i]); }
+    custom = nc;
+  } else {
+    delete cart[id];
+  }
+  rCart(); rProds(); rBadge();
+}
+
+function rCart() {
+  var el = document.getElementById("cartarea");
+  var all = [];
+  var ids = Object.keys(cart);
+  for (var i=0; i<ids.length; i++) {
+    var pid = parseInt(ids[i]);
+    var p = null;
+    for (var j=0; j<PRODS.length; j++) { if (PRODS[j].id === pid) { p = PRODS[j]; break; } }
+    if (p) all.push({id:p.id, n:p.n, q:cart[pid], u:p.u, isC:false});
+  }
+  for (var k=0; k<custom.length; k++) {
+    all.push({id:custom[k].id, n:custom[k].n, q:custom[k].q, u:custom[k].u, isC:true});
+  }
+  var tot = 0;
+  for (var m=0; m<all.length; m++) tot += all[m].q;
+  var bconf = document.getElementById("bconf");
+  if (!all.length) {
+    el.innerHTML = '<div class="cpanel"><div class="emsg"><div style="font-size:28px;margin-bottom:8px;">&#128722;</div>Sin productos todavia</div></div>';
+    bconf.disabled = true;
+    return;
+  }
+  bconf.disabled = false;
+  var rows = "";
+  for (var r=0; r<all.length; r++) {
+    var item = all[r];
+    rows += '<div class="ci">'
+      + '<div class="cin">' + item.n + (item.isC ? '<span class="tagc">custom</span>' : '') + '</div>'
+      + '<div class="ciq">' + item.q + ' ' + item.u + '</div>'
+      + '<button class="cdel" onclick="rmItem(\'' + item.id + '\',' + item.isC + ')">&#10005;</button>'
+      + '</div>';
+  }
+  el.innerHTML = '<div class="cpanel">' + rows
+    + '<div class="ctotal"><span class="ctl">Total de items</span>'
+    + '<span class="ctv">' + tot + ' ' + (tot===1?"item":"items") + '</span></div></div>';
+}
+
+function rBadge() {
+  var n = 0;
+  var ids = Object.keys(cart);
+  for (var i=0; i<ids.length; i++) n += cart[ids[i]];
+  for (var j=0; j<custom.length; j++) n += custom[j].q;
+  document.getElementById("badge").textContent = n;
+}
+
+function confirmar() {
+  var suc = document.getElementById("suc").value;
+  var fecha = document.getElementById("fdate").value;
+  var turno = document.getElementById("turno").value;
+  var obs = document.getElementById("obs").value.trim();
+  if (!suc) { toast("Selecciona la sucursal"); document.getElementById("suc").focus(); return; }
+  var all = [];
+  var ids = Object.keys(cart);
+  for (var i=0; i<ids.length; i++) {
+    var pid = parseInt(ids[i]);
+    var p = null;
+    for (var j=0; j<PRODS.length; j++) { if (PRODS[j].id === pid) { p = PRODS[j]; break; } }
+    if (p) all.push({n:p.n, q:cart[pid], u:p.u});
+  }
+  for (var k=0; k<custom.length; k++) {
+    all.push({n:custom[k].n, q:custom[k].q, u:custom[k].u, note:custom[k].note, isC:true});
+  }
+  if (!all.length) { toast("El pedido esta vacio"); return; }
+  var orden = {
+    id: "ORD-"+Date.now(),
+    suc: suc,
+    fecha: new Date().toISOString().slice(0,10),
+    fent: fecha,
+    turno: turno,
+    obs: obs,
+    items: all,
+    est: "pendiente"
+  };
+  hist.unshift(orden);
+  saveH(hist);
+  var lineas = "";
+  for (var l=0; l<all.length; l++) {
+    lineas += "\n- " + all[l].n + " x" + all[l].q + " " + all[l].u;
+    if (all[l].note) lineas += " (" + all[l].note + ")";
+  }
+  var msg = "PEDIDO CRYSTALPRO\nSucursal: " + suc + "\nFecha: " + fd(new Date().toISOString().slice(0,10));
+  if (fecha) msg += "\nEntrega: " + fd(fecha) + (turno ? " - " + turno : "");
+  msg += "\n" + lineas;
+  if (obs) msg += "\n\nObs: " + obs;
+  cart = {}; custom = [];
+  rProds(); rCart(); rBadge();
+  toast("Pedido guardado");
+  var waUrl = "https://wa.me/?text=" + encodeURIComponent(msg);
+  setTimeout(function() {
+    if (confirm("Pedido guardado. Enviar por WhatsApp ahora?")) {
+      window.open(waUrl, "_blank");
+    }
+  }, 600);
+}
+
+function rHist() {
+  var sEl = document.getElementById("hstats");
+  var lEl = document.getElementById("hlist");
+  hist = loadH();
+  if (!hist.length) {
+    sEl.innerHTML = "";
+    lEl.innerHTML = '<div class="hemp"><div style="font-size:32px;margin-bottom:10px;">&#128219;</div>No hay pedidos todavia</div>';
+    return;
+  }
+  var tot = 0;
+  for (var i=0; i<hist.length; i++) {
+    for (var j=0; j<hist[i].items.length; j++) tot += hist[i].items[j].q;
+  }
+  sEl.innerHTML = '<div class="slabel" style="padding-top:14px;">Resumen</div>'
+    + '<div class="hstats">'
+    + '<div class="sc"><div class="sv">' + hist.length + '</div><div class="sl">Pedidos realizados</div></div>'
+    + '<div class="sc"><div class="sv">' + tot + '</div><div class="sl">Items en total</div></div>'
+    + '</div>';
+  var html = "";
+  for (var h=0; h<hist.length; h++) {
+    var o = hist[h];
+    var tot2 = 0;
+    for (var x=0; x<o.items.length; x++) tot2 += o.items[x].q;
+    var prev = "";
+    var maxShow = Math.min(3, o.items.length);
+    for (var s=0; s<maxShow; s++) {
+      if (s>0) prev += ", ";
+      prev += o.items[s].n + " x" + o.items[s].q;
+    }
+    if (o.items.length > 3) prev += " y " + (o.items.length-3) + " mas";
+    html += '<div class="ocard">'
+      + '<div class="oh"><div>'
+      + '<div class="os">' + o.suc + '</div>'
+      + '<div class="od"><span class="dot ' + (o.est==="pendiente"?"dp":"de") + '"></span>'
+      + (o.est==="pendiente"?"Pendiente":"Enviado") + ' &middot; ' + fd(o.fecha) + '</div>'
+      + '</div><div style="font-size:12px;color:#aaa;">' + tot2 + ' items</div></div>'
+      + (o.fent ? '<div class="oe">Entrega: ' + fd(o.fent) + (o.turno?' &middot; '+o.turno:'') + '</div>' : '')
+      + '<div class="oi">' + prev + '</div>'
+      + (o.obs ? '<div style="font-size:11px;color:#aaa;margin-top:5px;">Obs: ' + o.obs + '</div>' : '')
+      + '<div class="oact">'
+      + '<button onclick="mkEnv(' + h + ')">' + (o.est==="pendiente"?"Marcar enviado":"Reabrir") + '</button>'
+      + '<button class="rep" onclick="repetir(' + h + ')">Repetir pedido</button>'
+      + '<button onclick="borrar(' + h + ')" style="flex:0;padding:8px 12px;">&#128465;</button>'
+      + '</div></div>';
+  }
+  lEl.innerHTML = html;
+}
+
+function mkEnv(i) {
+  hist[i].est = hist[i].est === "pendiente" ? "enviado" : "pendiente";
+  saveH(hist); rHist();
+}
+
+function repetir(i) {
+  var o = hist[i];
+  cart = {}; custom = [];
+  for (var k=0; k<o.items.length; k++) {
+    var item = o.items[k];
+    if (item.isC) {
+      custom.push({id:"c"+Date.now()+k, n:item.n, q:item.q, u:item.u, note:item.note, isC:true});
+    } else {
+      var p = null;
+      for (var j=0; j<PRODS.length; j++) { if (PRODS[j].n === item.n) { p = PRODS[j]; break; } }
+      if (p) cart[p.id] = (cart[p.id] || 0) + item.q;
+    }
+  }
+  document.getElementById("suc").value = o.suc;
+  goTab("pedido", document.querySelectorAll(".tab")[0]);
+  rProds(); rCart(); rBadge();
+  toast("Pedido cargado - revisa y confirma");
+}
+
+function borrar(i) {
+  if (confirm("Eliminar este pedido del historial?")) {
+    hist.splice(i, 1);
+    saveH(hist); rHist();
+  }
+}
+
+function toast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(function() { t.classList.remove("show"); }, 2500);
+}
+
+var mn = new Date(); mn.setDate(mn.getDate()+1);
+document.getElementById("fdate").min = mn.toISOString().slice(0,10);
+var df = new Date(); df.setDate(df.getDate()+2);
+document.getElementById("fdate").value = df.toISOString().slice(0,10);
+
+rCats();
+rProds();
+rCart();
+</script>
+</body>
+</html>
